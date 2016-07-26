@@ -35,5 +35,9 @@
   "Lists all modules that have been installed using KPM.":"Lists all modules that have been installed using KPM.",
   "No modules currently installed using KPM.":"No modules currently installed using KPM.\n",
   "Installed KPM modules are:":"Installed KPM modules are:\n",
-  "List does not take any arguments":"List does not take any arguments"
+  "List does not take any arguments":"List does not take any arguments",
+  "Modules found for your query:":"Modules found for your query:\n",
+  "No modules found in the KPM table.":"No modules found in the KPM table.",
+  "Searches the KPM table for modules.":"Searches the KPM table for modules.",
+  "Searches the KPM table for modules and filters the results.":"Searches the KPM table for modules and filters the results."
 }

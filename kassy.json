@@ -1,9 +1,10 @@
 {
 	"name": "kpm",
-	"version": 2.0,
+	"version": 3.0,
 	"startup": "kpm.js",
 	"priority": "first",
 	"help": [
 		["{{commandPrefix}}kpm", "KPM Help", "KPM Help Extended {{commandPrefix}}"]
-	]
+	],
+	"command": "kpm"
 }
