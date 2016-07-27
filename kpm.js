@@ -12,6 +12,8 @@ exports.load = () => {
         'update': require.once('./src/commands/update.js')(git, moduleList),
         'list': require.once('./src/commands/list.js')(moduleList),
         'search': require.once('./src/commands/search.js')(moduleList),
+        'config': require.once('./src/commands/configure.js')(),
+        'reload': require.once('./src/commands/reload.js')(),
         'help': require.once('./src/commands/help.js')()
     };
 };

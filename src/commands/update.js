@@ -14,7 +14,7 @@ let git = null,
 				this.modulesLoader.unloadModule(module, this.config);
 
 				// load new module copy
-				let descriptor = this.modulesLoader.verifyModule(module.folderPath);
+				let descriptor = this.modulesLoader.verifyModule(module.__folderPath);
 				try {
 					this.modulesLoader.loadModule(descriptor, this);
 					api.sendMessage($$`"${module.name}" is now at version ${module.__version}.`, event.thread_id);
