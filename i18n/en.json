@@ -35,5 +35,18 @@
   "Lists all modules that have been installed using KPM.":"Lists all modules that have been installed using KPM.",
   "No modules currently installed using KPM.":"No modules currently installed using KPM.\n",
   "Installed KPM modules are:":"Installed KPM modules are:\n",
-  "List does not take any arguments":"List does not take any arguments"
+  "List does not take any arguments":"List does not take any arguments",
+  "Modules found for your query:":"Modules found for your query:\n",
+  "No modules found in the KPM table.":"No modules found in the KPM table.",
+  "Searches the KPM table for modules.":"Searches the KPM table for modules.",
+  "Searches the KPM table for modules and filters the results.":"Searches the KPM table for modules and filters the results.",
+  "Incorrect arguments for configure.":"Incorrect arguments for configure.",
+  "Cannot set value to invalid JSON.":"Cannot set value to invalid JSON.",
+  "Gets and sets the configuration of modules.":"Gets and sets the configuration of modules.",
+  "Gets and sets the configuration of modules extended":"Sets the configuration of modules, regardless of installtion state - modules may need to be reloaded to receive configuration data. Will not set intermediate values of objects based on query. Use '^' for all of a config.",
+  "Reloads a module.":"Reloads a module.",
+  "Reloads a module extended":"Unloads and reloads a module. This can be useful if it does not automatically reload a configuration file but a restart is undesirable.",
+  "Too many arguments given to reload.":"Too many arguments given to reload.",
+  "\"${0}\" has reloaded.":"\"${0}\" has reloaded.",
+  "\"${0}\" failed to reload.":"\"${0}\" failed to reload."
 }
