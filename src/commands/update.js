@@ -2,8 +2,7 @@ let git = null,
 	moduleList = null,
 
 	update = function (module, api, event) {
-		console.log(module)
-		api.sendMessage($$`Updating "${module.name}" (${module.version})...`, event.thread_id);
+		api.sendMessage($$`Updating "${module.name}" (${module.__version})...`, event.thread_id);
 		git.pullWithPath(module.folderPath, function (err) {
 			if (err) {
 				api.sendMessage($$`Update failed`, event.thread_id);
