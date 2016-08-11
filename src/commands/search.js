@@ -3,23 +3,32 @@ let moduleList = null;
 module.exports = (list) => {
 	moduleList = list;
 	return {
-		run: function(args, api, event) {
+		run: function(args, api, event, opts) {
 			moduleList.refreshModuleTable(null, function() {
-				let query = args.join(' ').toLowerCase();
-				let l = $$`Modules found for your query:`,
-					mods = Object.keys(moduleList.getModuleTable());
-				for (let i = 0; i < mods.length; i++) {
-					if (mods[i].toLowerCase().contains(query)) {
-						l += '\t- ' + mods[i] + '\n';
+				let install = false;
+				if (args[0] === '--install') {
+					install = true;
+					args.shift();
+				}
+
+				let query = args.join(' ').toLowerCase(),
+					mods = Object.keys(moduleList.getModuleTable()),
+					fmods = mods.filter((v) => v.toLowerCase().contains(query));
+
+				if (!install) {
+					let l = $$`Modules found for your query:`;
+					l += '\t- ' + fmods.join('\n\t- ') + '\n';
+					if (fmods.length === 0) {
+						l += $$`No modules found in the KPM table.`;
 					}
+					api.sendMessage(l, event.thread_id);
 				}
-				if (mods.length === 0) {
-					l += $$`No modules found in the KPM table.`;
+				else {
+					opts['install'].run.call(this, fmods, api, event, opts);
 				}
-				api.sendMessage(l, event.thread_id);
-			});
+			}.bind(this));
 		},
-		command: 'search [<query>]',
+		command: 'search [--install] [<query>]',
 		help: $$`Searches the KPM table for modules.`,
 		detailedHelp: $$`Searches the KPM table for modules and filters the results.`
 	};
