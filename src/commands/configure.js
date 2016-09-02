@@ -43,8 +43,8 @@ module.exports = () => {
 				api.sendMessage($$`Incorrect arguments for configure.`, event.thread_id);
 				return;
 			}
-			let cfg = this.config.getLoadedModuleConfig(args[0]),
-				queryResult = getPropertyForString(cfg, 'data', args[1]);
+			let cfg = this.config.loadConfig(args[0]),
+				queryResult = getPropertyForString({ data: cfg }, 'data', args[1]);
 
 			if (args.length === 3) {
 				try {
@@ -52,9 +52,15 @@ module.exports = () => {
 					queryResult.parent[queryResult.property] = inputData;
 				}
 				catch(e) {
-					api.sendMessage($$`Cannot set value to invalid JSON.`, event.thread_id);
-					return;
+					api.sendMessage($$`Assuming configuration value is a string not JSON.`, event.thread_id);
+					queryResult.parent[queryResult.property] = args[2];
 				}
+
+                for (let key of Object.keys(cfg)) {
+                    if (key.startsWith('ENV_') && key === key.toUpperCase()) {
+                        process.env[key.substr(4)] = cfg[key];
+                    }
+                }
 			}
 
 			api.sendMessage(`${queryResult.query} = ${JSON.stringify(queryResult.parent[queryResult.property], null, 4)}`, event.thread_id);
