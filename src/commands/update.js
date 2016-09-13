@@ -3,13 +3,12 @@ let git = null,
 
 	update = function (module, api, event) {
 		api.sendMessage($$`Updating "${module.name}" (${module.__version})...`, event.thread_id);
-		git.pullWithPath(module.folderPath, function (err) {
+		git.pullWithPath(module.__folderPath, function (err) {
 			if (err) {
 				api.sendMessage($$`Update failed`, event.thread_id);
 			}
 			else {
 				api.sendMessage($$`Restarting module "${module.name}"...`, event.thread_id);
-				// todo: unload the current version
 				this.modulesLoader.unloadModule(module, this.config);
 
 				// load new module copy
