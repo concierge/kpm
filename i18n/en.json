@@ -41,7 +41,7 @@
   "Searches the KPM table for modules.":"Searches the KPM table for modules.",
   "Searches the KPM table for modules and filters the results.":"Searches the KPM table for modules and filters the results.",
   "Incorrect arguments for configure.":"Incorrect arguments for configure.",
-  "Cannot set value to invalid JSON.":"Cannot set value to invalid JSON.",
+  "Assuming configuration value is a string not JSON.":"Assuming configuration value is a string not JSON.",
   "Gets and sets the configuration of modules.":"Gets and sets the configuration of modules.",
   "Gets and sets the configuration of modules extended":"Sets the configuration of modules, regardless of installtion state - modules may need to be reloaded to receive configuration data. Will not set intermediate values of objects based on query. Use '^' for all of a config.",
   "Reloads a module.":"Reloads a module.",
