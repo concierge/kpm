@@ -58,5 +58,6 @@
   "Loads a module extended": "£aduje modu³. To mo¿e byæ u¿yteczne, je¿eli chcesz za³adowaæ nowy modu³ bez restartowania bota.",
   "Too many arguments given to load.": "Zbyt du¿o argumentów, aby za³adowaæ.",
   "\"${0}\" has been loaded.": "\"${0}\" zosta³ za³adowany.",
-  "\"${0}\" failed to load.": "\"${0}\" nie móg³ zostaæ za³adowany."
+  "\"${0}\" failed to load.": "\"${0}\" nie móg³ zostaæ za³adowany.",
+  "\"${0}\" failed to load - no such module.": "\"${0}\" nie móg³ zostaæ za³adowany - nie ma takiego modu³u."
 }

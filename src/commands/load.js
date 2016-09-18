@@ -1,5 +1,4 @@
-let sanitize = require('sanitize-filename'),
-	path = require('path');
+let path = require('path');
 
 module.exports = () => {
 	return {
@@ -9,9 +8,15 @@ module.exports = () => {
 				return;
 			}
 			let lowerName = args[0].trim().toLowerCase();
-
+            let loadDir;
 			try {
-                let loadDir = path.resolve('./modules/' + lowerName);
+                loadDir = path.resolve('./modules/' + lowerName);
+            }
+            catch (e) {
+                api.sendMessage($$`"${lowerName}" failed to load - no such module.`, event.thread_id);
+                return;
+            }
+            try {
 				let descriptor = this.modulesLoader.verifyModule(loadDir);
 				this.modulesLoader.loadModule(descriptor, this);
 				api.sendMessage($$`"${lowerName}" has been loaded.`, event.thread_id);

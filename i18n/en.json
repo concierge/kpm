@@ -58,5 +58,6 @@
   "Loads a module extended": "Loads a module. This can be useful if you want to load a new module without restarting the bot.",
   "Too many arguments given to load.": "Too many arguments given to load.",
   "\"${0}\" has been loaded.": "\"${0}\" has been loaded.",
-  "\"${0}\" failed to load.": "\"${0}\" failed to load."
+  "\"${0}\" failed to load.": "\"${0}\" failed to load.",
+  "\"${0}\" failed to load - no such module.": "\"${0}\" failed to load - no such module."
 }
