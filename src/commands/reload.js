@@ -20,7 +20,7 @@ module.exports = () => {
 				this.modulesLoader.unloadModule(module, this.config);
 				let descriptor = this.modulesLoader.verifyModule(module.__folderPath);
 				this.modulesLoader.loadModule(descriptor, this);
-				api.sendMessage($$`"${module.name}" has reloaded.`, event.thread_id);
+				api.sendMessage($$`"${module.name}" has been reloaded.`, event.thread_id);
 			}
 			catch (e) {
 				console.critical(e);

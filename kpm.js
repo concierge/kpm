@@ -14,6 +14,8 @@ exports.load = () => {
         'search': require.once('./src/commands/search.js')(moduleList),
         'config': require.once('./src/commands/configure.js')(),
         'reload': require.once('./src/commands/reload.js')(),
+        'load': require.once('./src/commands/load.js')(),
+        'unload': require.once('./src/commands/unload.js')(),
         'help': require.once('./src/commands/help.js')()
     };
 };
