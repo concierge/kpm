@@ -59,5 +59,6 @@
   "Too many arguments given to load.": "Too many arguments given to load.",
   "\"${0}\" has been loaded.": "\"${0}\" has been loaded.",
   "\"${0}\" failed to load.": "\"${0}\" failed to load.",
-  "\"${0}\" failed to load - no such module.": "\"${0}\" failed to load - no such module."
+  "\"${0}\" failed to load - no such module.": "\"${0}\" failed to load - no such module.",
+  "\"${0}\" is already loaded.": "\"${0}\" is already loaded."
 }
