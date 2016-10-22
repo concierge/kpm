@@ -2,23 +2,23 @@ let git = null,
     moduleList = null,
 
     update = function (module, api, event) {
-        api.sendMessage($$`Updating "${module.name}" (${module.__version})...`, event.thread_id);
-        git.pullWithPath(module.__folderPath, function (err) {
+        api.sendMessage($$`Updating "${module.__descriptor.name}" (${module.__descriptor.version})...`, event.thread_id);
+        git.pullWithPath(module.__descriptor.folderPath, function (err) {
             if (err) {
                 api.sendMessage($$`Update failed`, event.thread_id);
             }
             else {
-                api.sendMessage($$`Restarting module "${module.name}"...`, event.thread_id);
+                api.sendMessage($$`Restarting module "${module.__descriptor.name}"...`, event.thread_id);
                 this.modulesLoader.unloadModule(module, this.config);
 
                 // load new module copy
-                let descriptor = this.modulesLoader.verifyModule(module.__folderPath);
+                let descriptor = this.modulesLoader.verifyModule(module.__descriptor.folderPath);
                 try {
                     this.modulesLoader.loadModule(descriptor, this);
-                    api.sendMessage($$`"${module.name}" is now at version ${module.__version}.`, event.thread_id);
+                    api.sendMessage($$`"${module.__descriptor.name}" is now at version ${module.__descriptor.version}.`, event.thread_id);
                 }
                 catch (e) {
-                    api.sendMessage($$`Loading updated "${module.name}" failed`, event.thread_id);
+                    api.sendMessage($$`Loading updated "${module.__descriptor.name}" failed`, event.thread_id);
                 }
             }
         }.bind(this));

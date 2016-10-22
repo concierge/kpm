@@ -26,7 +26,7 @@ let urll = require('url'),
 
             descriptor.safeName = sanitize(descriptor.name);
             let instDir = path.resolve('./modules/kpm_' + descriptor.safeName);
-            fs.copy(moduleLocation, instDir, function (err) {
+            fs.copy(moduleLocation, instDir, (err) => {
                 if (err) {
                     console.debug(err);
                     api.sendMessage($$`An unknown error occurred while installing "${descriptor.name}".`, event.thread_id);
@@ -41,7 +41,7 @@ let urll = require('url'),
                 }
                 else {
                     api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) could not be installed, it appears to be invalid (syntax error?).`, event.thread_id);
-                    fs.emptyDir(descriptor.folderPath, function () {
+                    fs.emptyDir(descriptor.folderPath, () => {
                         // just delete if we can, not a lot we can do about errors here.
                     });
                 }

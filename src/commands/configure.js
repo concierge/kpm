@@ -35,7 +35,6 @@ let getPropertyForString = function(searchObject, defaultProperty, searchQuery) 
     };
 };
 
-
 module.exports = () => {
     return {
         run: function(args, api, event) {

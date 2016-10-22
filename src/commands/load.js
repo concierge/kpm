@@ -3,7 +3,13 @@ let fs = require('fs');
 
 module.exports = () => {
     return {
-        run: function(args, api, event) {
+        run: function(args, api, event, opts) {
+            let start = false;
+            if (args[0] === '--start') {
+                start = true;
+                args.shift();
+            }
+
             if (args.length !== 1) {
                 api.sendMessage($$`Too many arguments given to load.`, event.thread_id);
                 return;
@@ -11,7 +17,7 @@ module.exports = () => {
             let lowerName = args[0].trim().toLowerCase();
             let loadDir;
             let module = this.modulesLoader.getLoadedModules().filter((val) => {
-                    return val.name.toLowerCase() === lowerName;
+                    return val.__descriptor.name.toLowerCase() === lowerName;
                 })[0];
             if (module) {
                 api.sendMessage($$`"${args[0]}" is already loaded.`, event.thread_id);
@@ -37,8 +43,12 @@ module.exports = () => {
                 console.critical(e);
                 api.sendMessage($$`"${lowerName}" failed to load.`, event.thread_id);
             }
+
+            if (start) {
+                opts['start'].run.call(this, args, api, event);
+            }
         },
-        command: 'load <moduleName>',
+        command: 'load [--start] <moduleName>',
         help: $$`Loads a module.`,
         detailedHelp: $$`Loads a module extended`
     };

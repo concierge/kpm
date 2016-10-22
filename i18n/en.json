@@ -60,5 +60,15 @@
   "\"${0}\" has been loaded.": "\"${0}\" has been loaded.",
   "\"${0}\" failed to load.": "\"${0}\" failed to load.",
   "\"${0}\" failed to load - no such module.": "\"${0}\" failed to load - no such module.",
-  "\"${0}\" is already loaded.": "\"${0}\" is already loaded."
+  "\"${0}\" is already loaded.": "\"${0}\" is already loaded.",
+  "Too many arguments given to start.": "Too many arguments given to start.",
+  "Starts an integration": "Starts an integration.",
+  "Starts an integration extended": "Starts an integration. This can be useful if you want to start a new integration while Concierge is already running.",
+  "\"${0}\" has been started.": "\"${0}\" has been started.",
+  "\"${0}\" failed to start.": "\"${0}\" failed to start.",
+  "Too many arguments given to stop.": "Too many arguments given to stop.",
+  "Stops an integration": "Stops an integration.",
+  "Stops an integration extended": "Stops an integration. This can be useful if you want to stop an integration while Concierge is already running (to update it, replace it, deprecate it or change configuration).",
+  "\"${0}\" has been stopped.": "\"${0}\" has been stopped.",
+  "\"${0}\" failed to stop.": "\"${0}\" failed to stop."
 }

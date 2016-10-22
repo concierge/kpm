@@ -16,6 +16,8 @@ exports.load = () => {
         'reload': require.once('./src/commands/reload.js')(),
         'load': require.once('./src/commands/load.js')(),
         'unload': require.once('./src/commands/unload.js')(),
+        'start': require.once('./src/commands/start.js')(),
+        'stop': require.once('./src/commands/stop.js')(),
         'help': require.once('./src/commands/help.js')()
     };
 };

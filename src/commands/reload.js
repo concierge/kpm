@@ -7,7 +7,7 @@ module.exports = () => {
             }
             let lowerName = args[0].trim().toLowerCase(),
                 module = this.modulesLoader.getLoadedModules().filter((val) => {
-                    return val.name.toLowerCase() === lowerName;
+                    return val.__descriptor.name.toLowerCase() === lowerName;
                 })[0];
 
             if (!module) {
@@ -16,15 +16,15 @@ module.exports = () => {
             }
 
             try {
-                api.sendMessage($$`Restarting module "${module.name}"...`, event.thread_id);
+                api.sendMessage($$`Restarting module "${module.__descriptor.name}"...`, event.thread_id);
                 this.modulesLoader.unloadModule(module, this.config);
-                let descriptor = this.modulesLoader.verifyModule(module.__folderPath);
+                let descriptor = this.modulesLoader.verifyModule(module.__descriptor.folderPath);
                 this.modulesLoader.loadModule(descriptor, this);
-                api.sendMessage($$`"${module.name}" has been reloaded.`, event.thread_id);
+                api.sendMessage($$`"${module.__descriptor.name}" has been reloaded.`, event.thread_id);
             }
             catch (e) {
                 console.critical(e);
-                api.sendMessage($$`"${module.name}" failed to reload.`, event.thread_id);
+                api.sendMessage($$`"${module.__descriptor.name}" failed to reload.`, event.thread_id);
             }
         },
         command: 'reload <moduleName>',
