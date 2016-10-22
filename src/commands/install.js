@@ -26,7 +26,7 @@ let urll = require('url'),
 
             descriptor.safeName = sanitize(descriptor.name);
             let instDir = path.resolve('./modules/kpm_' + descriptor.safeName);
-            fs.copy(moduleLocation, instDir, (err) => {
+            fs.copy(moduleLocation, instDir, ((err) => {
                 if (err) {
                     console.debug(err);
                     api.sendMessage($$`An unknown error occurred while installing "${descriptor.name}".`, event.thread_id);
@@ -46,7 +46,7 @@ let urll = require('url'),
                     });
                 }
                 cleanup();
-            }.bind(this));
+            }).bind(this));
         }
         catch (e) {
             console.critical(e);
