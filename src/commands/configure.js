@@ -5,25 +5,27 @@ let getPropertyForString = function(searchObject, defaultProperty, searchQuery) 
         parent = searchObject,
         value = searchObject[defaultProperty],
         property = defaultProperty;
-    if (properties[0] !== '^') {
-        for (let i = 0, n = properties.length; i < n; i++) {
-            for (let j = i; j < properties.length; j++) {
-                let key = properties.slice(i, j + 1).join('.');
-                if (key in value) {
-                    property = key;
-                    parent = value;
-                    value = value[key];
-                    i = j;
-                    break;
-                }
-                else if (j + 1 === properties.length) {
-                    return {
-                        parent: value,
-                        property: key,
-                        value: void(0),
-                        query: searchQuery
-                    };
-                }
+
+    if (properties[0] === '^') {
+        properties.splice(0, 1);
+    }
+    for (let i = 0, n = properties.length; i < n; i++) {
+        for (let j = i; j < properties.length; j++) {
+            let key = properties.slice(i, j + 1).join('.');
+            if (key in value) {
+                property = key;
+                parent = value;
+                value = value[key];
+                i = j;
+                break;
+            }
+            else if (j + 1 === properties.length) {
+                return {
+                    parent: value,
+                    property: key,
+                    value: void(0),
+                    query: searchQuery
+                };
             }
         }
     }
@@ -34,7 +36,6 @@ let getPropertyForString = function(searchObject, defaultProperty, searchQuery) 
         query: searchQuery,
     };
 };
-
 
 module.exports = () => {
     return {
@@ -47,13 +48,33 @@ module.exports = () => {
                 queryResult = getPropertyForString({ data: cfg }, 'data', args[1]);
 
             if (args.length === 3) {
+                let inputData;
                 try {
-                    let inputData = JSON.parse(args[2]);
-                    queryResult.parent[queryResult.property] = inputData;
+                    inputData = JSON.parse(args[2]);
                 }
                 catch(e) {
                     api.sendMessage($$`Assuming configuration value is a string not JSON.`, event.thread_id);
-                    queryResult.parent[queryResult.property] = args[2];
+                    inputData = args[2];
+                }
+
+                if (queryResult.query === '^') {
+                    if (typeof(inputData) !== 'object' || Array.isArray(inputData)) {
+                        api.sendMessage($$`Cannot change config to a different type.`, event.thread_id);
+                        return;
+                    }
+                    for (let key in queryResult.parent[queryResult.property]) {
+                        if (queryResult.parent[queryResult.property].hasOwnProperty(key)) {
+                            delete queryResult.parent[queryResult.property][key];
+                        }
+                    }
+                    for (let key in inputData) {
+                        if (inputData.hasOwnProperty(key)) {
+                            queryResult.parent[queryResult.property][key] = inputData[key];
+                        }
+                    }
+                }
+                else {
+                    queryResult.parent[queryResult.property] = inputData;
                 }
 
                 for (let key of Object.keys(cfg)) {

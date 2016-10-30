@@ -60,5 +60,6 @@
   "\"${0}\" has been loaded.": "\"${0}\" has been loaded.",
   "\"${0}\" failed to load.": "\"${0}\" failed to load.",
   "\"${0}\" failed to load - no such module.": "\"${0}\" failed to load - no such module.",
-  "\"${0}\" is already loaded.": "\"${0}\" is already loaded."
+  "\"${0}\" is already loaded.": "\"${0}\" is already loaded.",
+  "Cannot change config to a different type.": "Cannot change config to a different primitive type (must be an object)."
 }
