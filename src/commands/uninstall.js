@@ -1,5 +1,5 @@
 let modulesList = null,
-    rmdir = require.safe('rimraf'),
+    rmdir = require('rimraf'),
 
     uninstall = function(module, api, event) {
         api.sendMessage($$`Unloading module "${module.__descriptor.name}".`, event.thread_id);
