@@ -24,7 +24,7 @@ module.exports = () => {
                 return;
             }
             try {
-                loadDir = path.resolve('./modules/' + lowerName);
+                loadDir = path.join(global.__modulesPath, lowerName);
                 let stats = fs.lstatSync(loadDir);
                 if (!stats.isDirectory()) {
                     throw Error($$`"${lowerName}" failed to load - no such module.`);
@@ -35,8 +35,10 @@ module.exports = () => {
                 return;
             }
             try {
-                let descriptor = this.modulesLoader.verifyModule(loadDir);
-                this.modulesLoader.loadModule(descriptor, this);
+                const descriptor = this.modulesLoader.verifyModule(loadDir);
+                if (!this.modulesLoader.loadModule(descriptor, this).success) {
+                    throw new Error('Load failed');
+                }
                 api.sendMessage($$`"${lowerName}" has been loaded.`, event.thread_id);
             }
             catch (e) {

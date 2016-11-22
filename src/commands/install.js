@@ -36,7 +36,7 @@ let urll = require('url'),
 
                 descriptor.folderPath = instDir;
                 let m = this.modulesLoader.loadModule(descriptor, this);
-                if (m !== null) {
+                if (m.success) {
                     api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) is now installed.`, event.thread_id);
                 }
                 else {

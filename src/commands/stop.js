@@ -16,7 +16,10 @@ module.exports = () => {
             }
 
             try {
-                this.modulesLoader.stopIntegration(module);
+                const result = this.modulesLoader.stopIntegration(module);
+                if (!result.success) {
+                    throw new Error('Stopping failed');
+                }
                 api.sendMessage($$`"${module.__descriptor.name}" has been stopped.`, event.thread_id);
             }
             catch (e) {

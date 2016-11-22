@@ -16,7 +16,10 @@ module.exports = () => {
             }
 
             try {
-                this.modulesLoader.startIntegration(this.onMessage.bind(this), module);
+                const result = this.modulesLoader.startIntegration(this.onMessage.bind(this), module);
+                if (!result.success) {
+                    throw new Error('Starting failed');
+                }
                 api.sendMessage($$`"${module.__descriptor.name}" has been started.`, event.thread_id);
             }
             catch (e) {

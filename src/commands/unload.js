@@ -16,7 +16,10 @@ module.exports = () => {
             }
 
             try {
-                this.modulesLoader.unloadModule(module, this.config);
+                const result = this.modulesLoader.unloadModule(module, this.config);
+                if (!result.success) {
+                    throw new Error('Unoading failed');
+                }
                 api.sendMessage($$`"${module.__descriptor.name}" has been unloaded.`, event.thread_id);
             }
             catch (e) {

@@ -1,24 +1,24 @@
-let git = require.once(rootPathJoin('core/git.js')),
+const git = require('concierge/git'),
     deasync = require('deasync'),
-    request = require('request'),
-    moduleList = null,
+    request = require('request');
+let moduleList = null,
     opts = null;
 
 exports.load = () => {
-    moduleList = require.once('./src/modulelist.js')(exports.config, exports.platform, deasync, request);
+    moduleList = require('./src/modulelist.js')(exports.config, exports.platform, deasync, request);
     opts = {
-        'install': require.once('./src/commands/install.js')(git, moduleList, request),
-        'uninstall': require.once('./src/commands/uninstall.js')(moduleList),
-        'update': require.once('./src/commands/update.js')(git, moduleList),
-        'list': require.once('./src/commands/list.js')(moduleList),
-        'search': require.once('./src/commands/search.js')(moduleList),
-        'config': require.once('./src/commands/configure.js')(),
-        'reload': require.once('./src/commands/reload.js')(),
-        'load': require.once('./src/commands/load.js')(),
-        'unload': require.once('./src/commands/unload.js')(),
-        'start': require.once('./src/commands/start.js')(),
-        'stop': require.once('./src/commands/stop.js')(),
-        'help': require.once('./src/commands/help.js')()
+        'install': require('./src/commands/install.js')(git, moduleList, request),
+        'uninstall': require('./src/commands/uninstall.js')(moduleList),
+        'update': require('./src/commands/update.js')(git, moduleList),
+        'list': require('./src/commands/list.js')(moduleList),
+        'search': require('./src/commands/search.js')(moduleList),
+        'config': require('./src/commands/configure.js')(),
+        'reload': require('./src/commands/reload.js')(),
+        'load': require('./src/commands/load.js')(),
+        'unload': require('./src/commands/unload.js')(),
+        'start': require('./src/commands/start.js')(),
+        'stop': require('./src/commands/stop.js')(),
+        'help': require('./src/commands/help.js')()
     };
 };
 

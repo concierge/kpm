@@ -14,7 +14,10 @@ let git = null,
                 // load new module copy
                 let descriptor = this.modulesLoader.verifyModule(module.__descriptor.folderPath);
                 try {
-                    this.modulesLoader.loadModule(descriptor, this);
+                    const result = this.modulesLoader.loadModule(descriptor, this);
+                    if (!result.success) {
+                        throw new Error('Restarting module failed');
+                    }
                     api.sendMessage($$`"${module.__descriptor.name}" is now at version ${module.__descriptor.version}.`, event.thread_id);
                 }
                 catch (e) {
