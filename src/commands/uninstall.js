@@ -4,7 +4,7 @@ let modulesList = null,
     uninstall = function(module, api, event) {
         api.sendMessage($$`Unloading module "${module.__descriptor.name}".`, event.thread_id);
         // unload the current version
-        const result = this.modulesLoader.unloadModule(module, this.config);
+        const result = this.modulesLoader.unloadModule(module);
         if (!result.success) {
             api.sendMessage($$`"${module.__descriptor.name}" failed to unload.`, event.thread_id);
             return;

@@ -17,10 +17,10 @@ module.exports = () => {
 
             try {
                 api.sendMessage($$`Restarting module "${module.__descriptor.name}"...`, event.thread_id);
-                let res = this.modulesLoader.unloadModule(module, this.config).success;
+                let res = this.modulesLoader.unloadModule(module).success;
                 let descriptor = this.modulesLoader.verifyModule(module.__descriptor.folderPath);
-                res = res || this.modulesLoader.loadModule(descriptor, this).success;
-                if (res) {
+                res = res && this.modulesLoader.loadModule(descriptor).success;
+                if (!res) {
                     throw new Error('Reload failed');
                 }
                 api.sendMessage($$`"${module.__descriptor.name}" has been reloaded.`, event.thread_id);

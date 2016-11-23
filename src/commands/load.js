@@ -36,7 +36,7 @@ module.exports = () => {
             }
             try {
                 const descriptor = this.modulesLoader.verifyModule(loadDir);
-                if (!this.modulesLoader.loadModule(descriptor, this).success) {
+                if (!this.modulesLoader.loadModule(descriptor).success) {
                     throw new Error('Load failed');
                 }
                 api.sendMessage($$`"${lowerName}" has been loaded.`, event.thread_id);

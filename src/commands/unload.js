@@ -16,7 +16,7 @@ module.exports = () => {
             }
 
             try {
-                const result = this.modulesLoader.unloadModule(module, this.config);
+                const result = this.modulesLoader.unloadModule(module);
                 if (!result.success) {
                     throw new Error('Unoading failed');
                 }
