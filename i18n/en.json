@@ -71,4 +71,5 @@
   "Stops an integration extended": "Stops an integration. This can be useful if you want to stop an integration while Concierge is already running (to update it, replace it, deprecate it or change configuration).",
   "\"${0}\" has been stopped.": "\"${0}\" has been stopped.",
   "\"${0}\" failed to stop.": "\"${0}\" failed to stop."
+  "Cannot change config to a different type.": "Cannot change config to a different primitive type (must be an object)."
 }
