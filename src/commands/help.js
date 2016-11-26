@@ -11,7 +11,7 @@ module.exports = function () {
                     api.sendMessage($$`No such command to show help for.`, event.thread_id);
                     return;
                 }
-                msg = opts[args[0]].command + '\n--------------------\n' + opts[args[0]].detailedHelp;
+                msg = `${opts[args[0]].command}\n--------------------\n${opts[args[0]].detailedHelp}`;
                 api.sendMessage(msg, event.thread_id);
             }
             else {
@@ -20,7 +20,7 @@ module.exports = function () {
                     if (opt === 'help') {
                         continue;
                     }
-                    msg += opts[opt].command + '\n\t' + opts[opt].help + '\n';
+                    msg += `${opts[opt].command}\n\t${opts[opt].help}\n`;
                 }
                 api.sendMessage(msg, event.thread_id);
             }

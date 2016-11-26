@@ -17,7 +17,7 @@ module.exports = (list) => {
 
                 if (!install) {
                     let l = $$`Modules found for your query:`;
-                    l += '\t- ' + fmods.join('\n\t- ') + '\n';
+                    l += `\t- ${fmods.join('\n\t- ')}\n`;
                     if (fmods.length === 0) {
                         l += $$`No modules found in the KPM table.`;
                     }

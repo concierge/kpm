@@ -1,15 +1,17 @@
-let urll = require('url'),
+const urll = require('url'),
     sanitize = require('sanitize-filename'),
     tmp = require('tmp'),
     fs = require('fs-extra'),
-    path = require('path'),
-    request = null,
-    git = null,
+    path = require('path');
+let types = null,
     moduleTable = null,
+    platform = null,
 
-    installCommon = function (name, moduleLocation, cleanup, api, event) {
+    installCommon = (url, moduleLocation, cleanup, api, event) => {
         try {
-            let descriptor = this.modulesLoader.verifyModule(moduleLocation),
+            const parsed = urll.parse(url),
+                cleaned = sanitize(path.basename(parsed.pathname)),
+                descriptor = platform.modulesLoader.verifyModule(moduleLocation),
                 moduleList = moduleTable.getModuleList();
 
             if (!descriptor) {
@@ -25,8 +27,8 @@ let urll = require('url'),
             }
 
             descriptor.safeName = sanitize(descriptor.name);
-            let instDir = path.resolve('./modules/kpm_' + descriptor.safeName);
-            fs.copy(moduleLocation, instDir, function (err) {
+            const instDir = path.resolve('./modules/kpm_' + descriptor.safeName);
+            fs.copy(moduleLocation, instDir, (err => {
                 if (err) {
                     console.debug(err);
                     api.sendMessage($$`An unknown error occurred while installing "${descriptor.name}".`, event.thread_id);
@@ -35,82 +37,30 @@ let urll = require('url'),
                 }
 
                 descriptor.folderPath = instDir;
-                let m = this.modulesLoader.loadModule(descriptor, this);
-                if (m !== null) {
+                const m = platform.modulesLoader.loadModule(descriptor);
+                if (m.success) {
                     api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) is now installed.`, event.thread_id);
                 }
                 else {
                     api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) could not be installed, it appears to be invalid (syntax error?).`, event.thread_id);
-                    fs.emptyDir(descriptor.folderPath, function () {
+                    fs.emptyDir(descriptor.folderPath, () => {
                         // just delete if we can, not a lot we can do about errors here.
                     });
                 }
                 cleanup();
-            }.bind(this));
+            }));
         }
         catch (e) {
             console.critical(e);
             api.sendMessage($$`Could not install "${name}".`, event.thread_id);
             cleanup();
         }
-    },
-
-    gitInstall = function(url, api, event) {
-        api.sendMessage($$`Attempting to install module from "${url}"`, event.thread_id);
-        tmp.dir(function (err, dir, cleanupCallback) {
-            if (err) {
-                throw err;
-            }
-            let cleanup = function(){
-                fs.emptyDir(dir, function () {
-                    cleanupCallback(); // not a lot we can do about errors here.
-                });
-            }.bind(this);
-
-            git.clone(url, dir, function (err1) {
-                if (err1) {
-                    console.critical(err1);
-                    cleanup();
-                    return api.sendMessage($$`Failed to install module from "${url}"`, event.thread_id);
-                }
-                let parsed = urll.parse(url),
-                    cleaned = sanitize(path.basename(parsed.pathname));
-                return installCommon.call(this, cleaned, dir, cleanup, api, event);
-            }.bind(this));
-        }.bind(this));
-    },
-
-    scriptInstall = function (url, api, event) {
-        api.sendMessage($$`Attempting to install script from "${url}"`, event.thread_id);
-        tmp.dir(function(err, dir, cleanupCallback) {
-            if (err) {
-                throw err;
-            }
-            let cleanup = function() {
-                fs.emptyDir(dir, function() {
-                    cleanupCallback(); // not a lot we can do about errors here.
-                });
-            }.bind(this);
-
-            let parsed = urll.parse(url),
-                cleaned = sanitize(path.basename(parsed.pathname));
-            request.get({ url: url }, function(error, response, body) {
-                if (err) {
-                    console.critical(err);
-                    cleanup();
-                    return api.sendMessage($$`Failed to install "${cleaned}"`, event.thread_id);
-                }
-
-                fs.writeFileSync(path.join(dir, cleaned), body, 'utf8');
-                return installCommon.call(this, cleaned, dir, cleanup, api, event);
-            }.bind(this));
-        }.bind(this));
     };
 
-module.exports = function (gitt, list, requests) {
-    git = gitt;
+module.exports = function (typess, list, platformp) {
+    types = typess;
     moduleTable = list;
-    request = requests;
+    platform = platformp;
     return {
         run: function(args, api, event) {
             if (args.length === 0) {
@@ -139,15 +89,32 @@ module.exports = function (gitt, list, requests) {
                     }
                 }
 
-                if (url.startsWith('ssh') || url.endsWith('.git')) {
-                    gitInstall.call(this, url, api, event);
-                }
-                else if (url.startsWith('http') && (url.endsWith('.coffee') || url.endsWith('.js'))) {
-                    scriptInstall.call(this, url, api, event);
-                }
-                else {
-                    api.sendMessage($$`Invalid KPM module provided "${url}"`, event.thread_id);
-                }
+                const failed = (err, url) => {
+                    api.sendMessage($$`Failed to install module from "${url}"`, event.thread_id);
+                    console.critical(err);
+                };
+
+                tmp.dir((err, dir, cleanupCallback) => {
+                    if (err) {
+                        failed(err, url);
+                        return;
+                    }
+                    const cleanup = (f, url) => {
+                        fs.emptyDir(dir, () => {
+                            cleanupCallback(); // not a lot we can do about errors here.
+                        });
+                        if (f) {
+                            failed(f, url);
+                        }
+                    };
+
+                    try {
+                        types('install', url, installCommon, url, dir, cleanup, api, event);
+                    }
+                    catch (e) {
+                        api.sendMessage($$`Invalid KPM module provided "${url}"`, event.thread_id);
+                    }
+                });
             }
         },
         command: 'install <url|ref> [<url|ref> [<url|ref> [...]]]',

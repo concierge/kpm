@@ -15,9 +15,7 @@ let deasync = null,
 		let mods = this.modulesLoader.getLoadedModules(),
 			list = {};
 		for (let i = 0; i < mods.length; i++) {
-			if (!mods[i].__coreOnly) {
-				list[mods[i].name] = mods[i];
-			}
+			list[mods[i].__descriptor.name] = mods[i];
 		}
 		return list;
 	},

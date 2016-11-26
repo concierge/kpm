@@ -1,32 +1,44 @@
-let git = null,
+let types = null,
     moduleList = null,
+    platform = null;
 
-    update = function (module, api, event) {
-        api.sendMessage($$`Updating "${module.name}" (${module.__version})...`, event.thread_id);
-        git.pullWithPath(module.__folderPath, function (err) {
-            if (err) {
-                api.sendMessage($$`Update failed`, event.thread_id);
-            }
-            else {
-                api.sendMessage($$`Restarting module "${module.name}"...`, event.thread_id);
-                this.modulesLoader.unloadModule(module, this.config);
+const updateCommon = (module, api, event, err) => {
+    if (err) {
+        api.sendMessage($$`Update failed`, event.thread_id);
+        return;
+    }
 
-                // load new module copy
-                let descriptor = this.modulesLoader.verifyModule(module.__folderPath);
-                try {
-                    this.modulesLoader.loadModule(descriptor, this);
-                    api.sendMessage($$`"${module.name}" is now at version ${module.__version}.`, event.thread_id);
-                }
-                catch (e) {
-                    api.sendMessage($$`Loading updated "${module.name}" failed`, event.thread_id);
-                }
-            }
-        }.bind(this));
-    };
+    api.sendMessage($$`Restarting module "${module.__descriptor.name}"...`, event.thread_id);
+    platform.modulesLoader.unloadModule(module);
 
-module.exports = function (gitt, list) {
-    git = gitt;
+    // load new module copy
+    const descriptor = platform.modulesLoader.verifyModule(module.__descriptor.folderPath);
+    try {
+        const result = platform.modulesLoader.loadModule(descriptor);
+        if (!result.success) {
+            throw new Error('Restarting module failed');
+        }
+        api.sendMessage($$`"${module.__descriptor.name}" is now at version ${module.__descriptor.version}.`, event.thread_id);
+    }
+    catch (e) {
+        api.sendMessage($$`Loading updated "${module.__descriptor.name}" failed`, event.thread_id);
+    }
+};
+
+const update = (module, api, event) => {
+    api.sendMessage($$`Updating "${module.__descriptor.name}" (${module.__descriptor.version})...`, event.thread_id);
+    try {
+        types('update', module, updateCommon, module, api, event);
+    }
+    catch (e) {
+        api.sendMessage($$`Update failed`, event.thread_id);
+    }
+};
+
+module.exports = function (typess, list, platformp) {
+    types = typess;
     moduleList = list;
+    platform = platformp;
     return {
         run: function (args, api, event) {
             let updateMods = moduleList.parseRuntimeModuleList(args, 'update', api, event);

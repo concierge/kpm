@@ -1,22 +1,25 @@
-let git = require.once(rootPathJoin('core/git.js')),
-    deasync = require('deasync'),
-    request = require('request'),
-    moduleList = null,
+const deasync = require('deasync'),
+    request = require('request');
+let moduleList = null,
+    types = null,
     opts = null;
 
 exports.load = () => {
-    moduleList = require.once('./src/modulelist.js')(exports.config, exports.platform, deasync, request);
+    moduleList = require('./src/modulelist.js')(exports.config, exports.platform, deasync, request);
+    types = require('./src/types.js');
     opts = {
-        'install': require.once('./src/commands/install.js')(git, moduleList, request),
-        'uninstall': require.once('./src/commands/uninstall.js')(moduleList),
-        'update': require.once('./src/commands/update.js')(git, moduleList),
-        'list': require.once('./src/commands/list.js')(moduleList),
-        'search': require.once('./src/commands/search.js')(moduleList),
-        'config': require.once('./src/commands/configure.js')(),
-        'reload': require.once('./src/commands/reload.js')(),
-        'load': require.once('./src/commands/load.js')(),
-        'unload': require.once('./src/commands/unload.js')(),
-        'help': require.once('./src/commands/help.js')()
+        'install': require('./src/commands/install.js')(types, moduleList, exports.platform),
+        'uninstall': require('./src/commands/uninstall.js')(moduleList),
+        'update': require('./src/commands/update.js')(types, moduleList, exports.platform),
+        'list': require('./src/commands/list.js')(moduleList),
+        'search': require('./src/commands/search.js')(moduleList),
+        'config': require('./src/commands/configure.js')(),
+        'reload': require('./src/commands/reload.js')(),
+        'load': require('./src/commands/load.js')(),
+        'unload': require('./src/commands/unload.js')(),
+        'start': require('./src/commands/start.js')(),
+        'stop': require('./src/commands/stop.js')(),
+        'help': require('./src/commands/help.js')()
     };
 };
 
@@ -26,7 +29,7 @@ exports.unload = () => {
 };
 
 exports.run = (api, event) => {
-    let commands = event.arguments,
+    const commands = event.arguments,
         command = commands.length >= 2 ? commands[1].toLowerCase() : null;
     if (command === null || !opts[command]) {
         let t = $$`Invalid usage of KPM`;
