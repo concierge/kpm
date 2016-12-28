@@ -11,9 +11,9 @@ exports.install = (callback, url, dir, cleanup, api, event) => {
             return;
         }
 
-        fs.stat(path.join(module.__descriptor.folderPath, 'package.json'), (err, stat) => {
+        fs.stat(path.join(dir, 'package.json'), (err, stat) => {
             if (!err && stat.isFile()) {
-                npm(['install'], module.__descriptor.folderPath);
+                npm(['install'], dir);
             }
             callback(url, dir, cleanup, api, event);
         });

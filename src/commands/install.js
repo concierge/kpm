@@ -113,6 +113,7 @@ module.exports = function (typess, list, platformp) {
                     }
                     catch (e) {
                         api.sendMessage($$`Invalid KPM module provided "${url}"`, event.thread_id);
+                        console.critical(e);
                     }
                 });
             }
