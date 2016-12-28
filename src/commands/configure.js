@@ -44,7 +44,11 @@ module.exports = () => {
                 api.sendMessage($$`Incorrect arguments for configure.`, event.thread_id);
                 return;
             }
-            let cfg = this.config.loadConfig(args[0]),
+            let cfg = this.config.loadConfig({
+                    name: args[0],
+                    type: [],
+                    force: true
+                }),
                 queryResult = getPropertyForString({ data: cfg }, 'data', args[1]);
 
             if (args.length === 3) {

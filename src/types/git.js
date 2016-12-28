@@ -1,6 +1,7 @@
 const fs = require('fs'),
     path = require('path'),
-    git = require('concierge/git');
+    git = require('concierge/git'),
+    npm = require('concierge/npm');
 
 exports.install = (callback, url, dir, cleanup, api, event) => {
     api.sendMessage($$`Attempting to install module from "${url}"`, event.thread_id);
@@ -9,7 +10,13 @@ exports.install = (callback, url, dir, cleanup, api, event) => {
             cleanup(err, url);
             return;
         }
-        callback(url, dir, cleanup, api, event);
+
+        fs.stat(path.join(dir, 'package.json'), (err, stat) => {
+            if (!err && stat.isFile()) {
+                npm(['install'], dir);
+            }
+            callback(url, dir, cleanup, api, event);
+        });
     });
 };
 
@@ -20,7 +27,13 @@ exports.update = (callback, module, api, event) => {
             const hbp = path.join(module.__descriptor.folderPath, 'hubot.json');
             fs.unlinkSync(hbp);
         } catch(e) {}
-        callback(module, api, event, err);
+
+        fs.stat(path.join(module.__descriptor.folderPath, 'node_modules'), (err, stat) => {
+            if (!err && stat.isDirectory()) {
+                npm(['update'], module.__descriptor.folderPath);
+            }
+            callback(module, api, event, err);
+        });
     });
 };
 

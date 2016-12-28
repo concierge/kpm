@@ -18,7 +18,7 @@ const updateCommon = (module, api, event, err) => {
         if (!result.success) {
             throw new Error('Restarting module failed');
         }
-        api.sendMessage($$`"${module.__descriptor.name}" is now at version ${module.__descriptor.version}.`, event.thread_id);
+        api.sendMessage($$`"${module.__descriptor.name}" is now at version ${result.module.__descriptor.version}.`, event.thread_id);
     }
     catch (e) {
         api.sendMessage($$`Loading updated "${module.__descriptor.name}" failed`, event.thread_id);
