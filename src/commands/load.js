@@ -16,16 +16,21 @@ module.exports = () => {
             }
             let lowerName = args[0].trim().toLowerCase();
             let loadDir;
-            let module = this.modulesLoader.getLoadedModules().filter((val) => {
-                    return val.__descriptor.name.toLowerCase() === lowerName;
-                })[0];
+            let module = this.modulesLoader.getLoadedModules().filter(val => val.__descriptor.name.toLowerCase() === lowerName)[0];
             if (module) {
                 api.sendMessage($$`"${args[0]}" is already loaded.`, event.thread_id);
                 return;
             }
             try {
-                loadDir = path.join(global.__modulesPath, lowerName);
-                let stats = fs.lstatSync(loadDir);
+                let stats;
+                try {
+                    loadDir = path.join(global.__modulesPath, lowerName);
+                    stats = fs.lstatSync(loadDir);
+                }
+                catch (e) {
+                    loadDir = path.join(global.__modulesPath, 'kpm_' + lowerName);
+                    stats = fs.lstatSync(loadDir);
+                }
                 if (!stats.isDirectory()) {
                     throw Error($$`"${lowerName}" failed to load - no such module.`);
                 }
