@@ -1,6 +1,8 @@
 const request = require('request'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    urll = require('url'),
+    sanitize = require('sanitize-filename');
 
 exports.install = (callback, url, dir, cleanup, api, event) => {
     api.sendMessage($$`Attempting to install script from "${url}"`, event.thread_id);
@@ -9,7 +11,8 @@ exports.install = (callback, url, dir, cleanup, api, event) => {
             cleanup(err, url);
             return;
         }
-
+        const parsed = urll.parse(url),
+            cleaned = sanitize(path.basename(parsed.pathname));
         fs.writeFileSync(path.join(dir, cleaned), body, 'utf8');
         fs.writeFileSync(path.join(dir, '.url'), JSON.stringify({url:url}), 'utf8');
         callback(url, dir, cleanup, api, event);

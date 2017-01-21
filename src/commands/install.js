@@ -15,7 +15,7 @@ let types = null,
                 moduleList = moduleTable.getModuleList();
 
             if (!descriptor) {
-                api.sendMessage($$`"${name}" is not a valid module/script.`, event.thread_id);
+                api.sendMessage($$`"${url}" is not a valid module/script.`, event.thread_id);
                 cleanup();
                 return;
             }
@@ -27,7 +27,7 @@ let types = null,
             }
 
             descriptor.safeName = sanitize(descriptor.name);
-            const instDir = path.resolve('./modules/kpm_' + descriptor.safeName);
+            const instDir = path.join(global.__modulesPath, descriptor.safeName);
             fs.copy(moduleLocation, instDir, (err => {
                 if (err) {
                     console.debug(err);
