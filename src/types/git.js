@@ -5,14 +5,14 @@ const fs = require('fs'),
 
 exports.install = (callback, url, dir, cleanup, api, event) => {
     api.sendMessage($$`Attempting to install module from "${url}"`, event.thread_id);
-    git.clone(url, dir, (err) => {
+    git.clone(url, dir, err => {
         if (err) {
             cleanup(err, url);
             return;
         }
 
-        fs.stat(path.join(dir, 'package.json'), (err, stat) => {
-            if (!err && stat.isFile()) {
+        fs.stat(path.join(dir, 'package.json'), (err2, stat) => {
+            if (!err2 && stat.isFile()) {
                 npm(['install'], dir);
             }
             callback(url, dir, cleanup, api, event);
@@ -21,15 +21,15 @@ exports.install = (callback, url, dir, cleanup, api, event) => {
 };
 
 exports.update = (callback, module, api, event) => {
-    git.pullWithPath(module.__descriptor.folderPath, (err) => {
+    git.pullWithPath(module.__descriptor.folderPath, err => {
         try {
             // force hubot.json to update
             const hbp = path.join(module.__descriptor.folderPath, 'hubot.json');
             fs.unlinkSync(hbp);
         } catch(e) {}
 
-        fs.stat(path.join(module.__descriptor.folderPath, 'node_modules'), (err, stat) => {
-            if (!err && stat.isDirectory()) {
+        fs.stat(path.join(module.__descriptor.folderPath, 'node_modules'), (err2, stat) => {
+            if (!err2 && stat.isDirectory()) {
                 npm(['update'], module.__descriptor.folderPath);
             }
             callback(module, api, event, err);
