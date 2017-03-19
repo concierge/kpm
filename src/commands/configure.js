@@ -40,7 +40,7 @@ let getPropertyForString = function(searchObject, defaultProperty, searchQuery) 
 module.exports = () => {
     return {
         run: function(args, api, event) {
-            if (args.length !== 2 && args.length !== 3) {
+            if (args.length < 2) {
                 api.sendMessage($$`Incorrect arguments for configure.`, event.thread_id);
                 return;
             }
@@ -51,14 +51,15 @@ module.exports = () => {
                 }),
                 queryResult = getPropertyForString({ data: cfg }, 'data', args[1]);
 
-            if (args.length === 3) {
+            if (args.length >= 3) {
+                const rawData = args.slice(2).join(' ');
                 let inputData;
                 try {
-                    inputData = JSON.parse(args[2]);
+                    inputData = JSON.parse(rawData);
                 }
                 catch(e) {
                     api.sendMessage($$`Assuming configuration value is a string not JSON.`, event.thread_id);
-                    inputData = args[2];
+                    inputData = rawData;
                 }
 
                 if (queryResult.query === '^') {
