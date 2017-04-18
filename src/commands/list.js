@@ -1,23 +1,16 @@
-let moduleList = null;
-
-module.exports = (list) => {
-    moduleList = list;
+module.exports = moduleList => {
     return {
-        run: function(args, api, event) {
+        run: (args, api, event) => {
             if (args.length > 0) {
-                api.sendMessage($$`List does not take any arguments`, event.thread_id);
-                return;
+                return api.sendMessage($$`List does not take any arguments`, event.thread_id);
             }
 
-            let l = $$`Installed KPM modules are:`,
-                mods = Object.keys(moduleList.getModuleList());
-            for (let i = 0; i < mods.length; i++) {
-                l += '\t- ' + mods[i] + '\n';
+            const l = $$`Installed KPM modules are:`;
+            let mods = Object.keys(moduleList.getModuleList()).map(m => `\t- ${m}`).join('\n');
+            if (!mods) {
+                mods = $$`No modules currently installed using KPM.`;
             }
-            if (mods.length === 0) {
-                l += $$`No modules currently installed using KPM.`;
-            }
-            api.sendMessage(l, event.thread_id);
+            api.sendMessage(l + mods, event.thread_id);
         },
         command: 'list',
         help: $$`Lists all installed modules (except preinstalled ones).`,

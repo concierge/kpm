@@ -3,32 +3,19 @@ const urll = require('url'),
     tmp = require('tmp'),
     fs = require('fs-extra'),
     path = require('path');
-let types = null,
-    moduleTable = null,
-    platform = null,
 
-    installCommon = (url, moduleLocation, cleanup, api, event) => {
+module.exports = (types, moduleTable, moduleCtrl) => {
+    const installFinal = (moduleLocation, cleanup, api, event, descriptor) => {
+        const moduleList = moduleTable.getModuleList();
         try {
-            const parsed = urll.parse(url),
-                cleaned = sanitize(path.basename(parsed.pathname)),
-                descriptor = platform.modulesLoader.verifyModule(moduleLocation),
-                moduleList = moduleTable.getModuleList();
-
-            if (!descriptor) {
-                api.sendMessage($$`"${url}" is not a valid module/script.`, event.thread_id);
-                cleanup();
-                return;
-            }
-
-            if (moduleList[descriptor.name] || moduleList['kpm_' + descriptor.name]) {
+            if (moduleList[descriptor.name] || moduleList[`kpm_${descriptor.name}`]) {
                 api.sendMessage($$`A module with name or directory "${descriptor.name}" has already been installed.`, event.thread_id);
-                cleanup();
-                return;
+                return cleanup();
             }
 
             descriptor.safeName = sanitize(descriptor.name);
             const instDir = path.join(global.__modulesPath, descriptor.safeName);
-            fs.copy(moduleLocation, instDir, (err => {
+            fs.move(moduleLocation, instDir, (err => {
                 if (err) {
                     console.debug(err);
                     api.sendMessage($$`An unknown error occurred while installing "${descriptor.name}".`, event.thread_id);
@@ -37,16 +24,12 @@ let types = null,
                 }
 
                 descriptor.folderPath = instDir;
-                const m = platform.modulesLoader.loadModule(descriptor);
-                if (m.success) {
-                    api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) is now installed.`, event.thread_id);
-                }
-                else {
-                    api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) could not be installed, it appears to be invalid (syntax error?).`, event.thread_id);
-                    fs.emptyDir(descriptor.folderPath, () => {
-                        // just delete if we can, not a lot we can do about errors here.
+                moduleCtrl.load(descriptor.folderPath)
+                    .then(() => api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) is now installed.`, event.thread_id))
+                    .catch(() => {
+                        api.sendMessage($$`"${descriptor.name}" (${descriptor.version}) could not be installed, it appears to be invalid (syntax error?).`, event.thread_id);
+                        fs.emptyDir(descriptor.folderPath, () => fs.rmdir(descriptor.folderPath, () => {}));
                     });
-                }
                 cleanup();
             }));
         }
@@ -57,27 +40,22 @@ let types = null,
         }
     };
 
-module.exports = function (typess, list, platformp) {
-    types = typess;
-    moduleTable = list;
-    platform = platformp;
     return {
-        run: function(args, api, event) {
+        run: (args, api, event) => {
             if (args.length === 0) {
-                api.sendMessage($$`Nothing provided to install!`, event.thread_id);
-                return;
+                return api.sendMessage($$`Nothing provided to install!`, event.thread_id);
             }
 
             for (let i = 0; i < args.length; i++) {
                 let url = args[i],
                     spl = url.split('/');
                 if (spl.length === 1) {
-                    moduleTable.refreshModuleTable(url, function(u, err) {
+                    moduleTable.refreshModuleTable(url, (u, err) => {
                         if (err || !moduleTable.getModuleTable()[u]) {
                             return;
                         }
                         url = moduleTable.getModuleTable()[u];
-                    }.bind(this));
+                    });
                 }
                 else if (!url.startsWith('ssh') && !url.startsWith('http')) {
                     if (spl.length === 2) {
@@ -96,8 +74,7 @@ module.exports = function (typess, list, platformp) {
 
                 tmp.dir((err, dir, cleanupCallback) => {
                     if (err) {
-                        failed(err, url);
-                        return;
+                        return failed(err, url);
                     }
                     const cleanup = (f, url) => {
                         fs.emptyDir(dir, () => {
@@ -109,7 +86,14 @@ module.exports = function (typess, list, platformp) {
                     };
 
                     try {
-                        types('install', url, installCommon, url, dir, cleanup, api, event);
+                        types('install', url, (url, moduleLocation, cleanup, api, event) => {
+                            moduleCtrl.verify(moduleLocation)
+                                .then(installFinal.bind(this, moduleLocation, cleanup, api, event))
+                                .catch(() => {
+                                    api.sendMessage($$`"${url}" is not a valid module/script.`, event.thread_id);
+                                    return cleanup();
+                                });
+                        }, url, dir, cleanup, api, event);
                     }
                     catch (e) {
                         api.sendMessage($$`Invalid KPM module provided "${url}"`, event.thread_id);

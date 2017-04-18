@@ -1,4 +1,4 @@
-let getPropertyForString = function(searchObject, defaultProperty, searchQuery) {
+const getPropertyForString = (searchObject, defaultProperty, searchQuery) => {
     let query = searchQuery.replace(/\[([^\]]+)\]/g, '.$1');
     query = query.replace(/^\./, '');
     let properties = query.split('.'),
@@ -37,19 +37,18 @@ let getPropertyForString = function(searchObject, defaultProperty, searchQuery) 
     };
 };
 
-module.exports = () => {
+module.exports = moduleCtrl => {
     return {
-        run: function(args, api, event) {
+        run: (args, api, event) => {
             if (args.length < 2) {
-                api.sendMessage($$`Incorrect arguments for configure.`, event.thread_id);
-                return;
+                return api.sendMessage($$`Incorrect arguments for configure.`, event.thread_id);
             }
-            let cfg = this.config.loadConfig({
+            const cfg = moduleCtrl.getConfig({
                     name: args[0],
                     type: [],
                     force: true
-                }),
-                queryResult = getPropertyForString({ data: cfg }, 'data', args[1]);
+                });
+            let queryResult = getPropertyForString({ data: cfg }, 'data', args[1]);
 
             if (args.length >= 3) {
                 const rawData = args.slice(2).join(' ');
