@@ -48,7 +48,7 @@ exports.typeTest = (op, url) => {
         case 'install':
             return url.startsWith('http') && (url.endsWith('.coffee') || url.endsWith('.js'));
         case 'update':
-            const folderPath = selector.__descriptor.folderPath;
+            const folderPath = url.__descriptor.folderPath;
             return fs.statSync(path.join(folderPath, '.url')).isFile() && fs.statSync(path.join(folderPath, 'hubot.json')).isFile();
     }
 };

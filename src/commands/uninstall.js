@@ -1,41 +1,36 @@
-let modulesList = null,
-    rmdir = require('rimraf'),
+const rmdir = require('rimraf');
 
-    uninstall = function(module, api, event, preserveSelf) {
-        if (module.__descriptor.name === 'kpm' && preserveSelf) {
-            api.sendMessage($$`Uninstall Self`, event.thread_id);
-            return;
+module.exports = (modulesList, moduleCtrl) => {
+    const uninstall = (mod, api, event, preserveSelf) => {
+        if (mod.__descriptor.name === 'kpm' && preserveSelf) {
+            return api.sendMessage($$`Uninstall Self`, event.thread_id);
         }
-        api.sendMessage($$`Unloading module "${module.__descriptor.name}".`, event.thread_id);
-        // unload the current version
-        const result = this.modulesLoader.unloadModule(module);
-        if (!result.success) {
-            api.sendMessage($$`"${module.__descriptor.name}" failed to unload.`, event.thread_id);
-            return;
-        }
+        api.sendMessage($$`Unloading module "${mod.__descriptor.name}".`, event.thread_id);
 
-        rmdir(module.__descriptor.folderPath, function (error) {
-            if (error) {
-                console.debug(error);
-                api.sendMessage($$`Failed to delete module "${module.__descriptor.name}".`, event.thread_id);
-            }
-            else {
-                api.sendMessage($$`Uninstalled module "${module.__descriptor.name}".`, event.thread_id);
-            }
-        });
+        moduleCtrl.unload(mod)
+            .then(() => {
+                rmdir(mod.__descriptor.folderPath, error => {
+                    if (error) {
+                        LOG.debug(error);
+                        api.sendMessage($$`Failed to delete module "${mod.__descriptor.name}".`, event.thread_id);
+                    }
+                    else {
+                        api.sendMessage($$`Uninstalled module "${mod.__descriptor.name}".`, event.thread_id);
+                    }
+                });
+            })
+            .catch(() => api.sendMessage($$`"${mod.__descriptor.name}" failed to unload.`, event.thread_id));
     };
 
-module.exports = function (list) {
-    modulesList = list;
     return {
-        run: function(args, api, event) {
+        run: (args, api, event) => {
             const ind = args.indexOf('--no-preserve-kpm');
             if (ind >= 0) {
                 args.splice(ind, 1);
             }
             const uninstallMods = modulesList.parseRuntimeModuleList(args, 'uninstall', api, event);
             for (let m in uninstallMods) {
-                uninstall.call(this, uninstallMods[m], api, event, ind < 0);
+                uninstall(uninstallMods[m], api, event, ind < 0);
             }
         },
         command: 'uninstall [<moduleName> [<moduleName> [...]]]',

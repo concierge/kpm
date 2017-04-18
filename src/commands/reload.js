@@ -1,34 +1,19 @@
-module.exports = () => {
+module.exports = moduleCtrl => {
     return {
-        run: function(args, api, event) {
+        run: (args, api, event) => {
             if (args.length !== 1) {
-                api.sendMessage($$`Too many arguments given to reload.`, event.thread_id);
-                return;
-            }
-            let lowerName = args[0].trim().toLowerCase(),
-                module = this.modulesLoader.getLoadedModules().filter((val) => {
-                    return val.__descriptor.name.toLowerCase() === lowerName;
-                })[0];
-
-            if (!module) {
-                api.sendMessage($$`"${args[0]}" is not a valid module/script.`, event.thread_id);
-                return;
+                return api.sendMessage($$`Too many arguments given to reload.`, event.thread_id);
             }
 
-            try {
-                api.sendMessage($$`Restarting module "${module.__descriptor.name}"...`, event.thread_id);
-                let res = this.modulesLoader.unloadModule(module).success;
-                let descriptor = this.modulesLoader.verifyModule(module.__descriptor.folderPath);
-                res = res && this.modulesLoader.loadModule(descriptor).success;
-                if (!res) {
-                    throw new Error('Reload failed');
-                }
-                api.sendMessage($$`"${module.__descriptor.name}" has been reloaded.`, event.thread_id);
+            const mod = moduleCtrl.findLoadedModule(args[0]);
+            if (!mod) {
+                return api.sendMessage($$`"${args[0]}" is not a valid module/script.`, event.thread_id);
             }
-            catch (e) {
-                console.critical(e);
-                api.sendMessage($$`"${module.__descriptor.name}" failed to reload.`, event.thread_id);
-            }
+
+            api.sendMessage($$`Restarting module "${mod.__descriptor.name}"...`, event.thread_id);
+            moduleCtrl.reload(mod)
+                .then(() => api.sendMessage($$`"${mod.__descriptor.name}" has been reloaded.`, event.thread_id))
+                .catch(() => api.sendMessage($$`"${mod.__descriptor.name}" failed to reload.`, event.thread_id));
         },
         command: 'reload <moduleName>',
         help: $$`Reloads a module.`,

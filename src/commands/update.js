@@ -1,49 +1,28 @@
-let types = null,
-    moduleList = null,
-    platform = null;
-
-const updateCommon = (module, api, event, err) => {
-    if (err) {
-        api.sendMessage($$`Update failed`, event.thread_id);
-        return;
-    }
-
-    api.sendMessage($$`Restarting module "${module.__descriptor.name}"...`, event.thread_id);
-    platform.modulesLoader.unloadModule(module);
-
-    // load new module copy
-    const descriptor = platform.modulesLoader.verifyModule(module.__descriptor.folderPath);
-    try {
-        const result = platform.modulesLoader.loadModule(descriptor);
-        if (!result.success) {
-            throw new Error('Restarting module failed');
+module.exports = (types, moduleList, moduleCtrl) => {
+    const updateCommon = (mod, api, event, err) => {
+        if (err) {
+            api.sendMessage($$`Update failed`, event.thread_id);
+            return;
         }
-        api.sendMessage($$`"${module.__descriptor.name}" is now at version ${result.module.__descriptor.version}.`, event.thread_id);
-    }
-    catch (e) {
-        api.sendMessage($$`Loading updated "${module.__descriptor.name}" failed`, event.thread_id);
-    }
-};
 
-const update = (module, api, event) => {
-    api.sendMessage($$`Updating "${module.__descriptor.name}" (${module.__descriptor.version})...`, event.thread_id);
-    try {
-        types('update', module, updateCommon, module, api, event);
-    }
-    catch (e) {
-        api.sendMessage($$`Update failed`, event.thread_id);
-    }
-};
+        api.sendMessage($$`Restarting module "${mod.__descriptor.name}"...`, event.thread_id);
+        moduleCtrl.reload(mod)
+            .then(res => api.sendMessage($$`"${res.name}" is now at version ${res.version}.`, event.thread_id))
+            .catch(() => api.sendMessage($$`Loading updated "${mod.__descriptor.name}" failed`, event.thread_id));
+    };
 
-module.exports = function (typess, list, platformp) {
-    types = typess;
-    moduleList = list;
-    platform = platformp;
     return {
-        run: function (args, api, event) {
-            let updateMods = moduleList.parseRuntimeModuleList(args, 'update', api, event);
+        run: (args, api, event) => {
+            const updateMods = moduleList.parseRuntimeModuleList(args, 'update', api, event);
             for (let m in updateMods) {
-                update.call(this, updateMods[m], api, event);
+                api.sendMessage($$`Updating "${updateMods[m].__descriptor.name}" (${updateMods[m].__descriptor.version})...`, event.thread_id);
+                try {
+                    types('update', updateMods[m], updateCommon, updateMods[m], api, event);
+                }
+                catch (e) {
+                    console.critical(e);
+                    api.sendMessage($$`Update failed`, event.thread_id);
+                }
             }
         },
         command: 'update [<moduleName> [<moduleName> [...]]]',
