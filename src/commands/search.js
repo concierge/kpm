@@ -1,7 +1,7 @@
 module.exports = moduleList => {
     return {
         run: (args, api, event, opts) => {
-            moduleList.refreshModuleTable(null, () => {
+            const search = () => {
                 let install = false;
                 if (args[0] === '--install') {
                     install = true;
@@ -22,7 +22,8 @@ module.exports = moduleList => {
                 else {
                     opts['install'].run(fmods, api, event, opts);
                 }
-            });
+            };
+            moduleList.refreshModuleTable().then(search);
         },
         command: 'search [--install] [<query>]',
         help: $$`Searches the KPM table for modules.`,

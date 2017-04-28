@@ -1,5 +1,4 @@
-const deasync = require('deasync'),
-    request = require('request');
+const request = require('request');
 
 module.exports = (config, moduleCtrl) => {
     let moduleTableUrl = null,
@@ -39,44 +38,49 @@ module.exports = (config, moduleCtrl) => {
     	return updateMods;
     };
 
-    const refreshModuleTable = (url, callback) => {
-    	if (moduleTable.lastUpdated != null && new Date() - moduleTable.lastUpdated < moduleTableUpdateTimeout) {
-    		return callback(url);
-    	}
+    const refreshModuleTable = () => {
+        return new Promise(resolve => {
+            if (moduleTable.lastUpdated !== null && new Date() - moduleTable.lastUpdated < moduleTableUpdateTimeout) {
+        		return resolve();
+        	}
 
-    	let sreq = deasync(request.get);
-    	let response = sreq(moduleTableUrl);
-    	if (response.statusCode === 200 && response.body) {
-    		let b = response.body;
-    		if (b && b.length > 0) {
-    			let spl = b.split('\n'),
-    				shouldParse = false,
-    				foundModules = {};
-    			for (let i = 0; i < spl.length; i++) {
-    				if (!spl[i].startsWith('|')) {
-    					continue;
-    				}
+            request.get(moduleTableUrl, (err, response) => {
+                if (err) {
+                    return resolve(err);
+                }
+                if (response.statusCode === 200 && response.body) {
+            		const b = response.body;
+            		if (b && b.length > 0) {
+            			const spl = b.split('\n'),
+                            foundModules = {};
+            			let shouldParse = false;
+            			for (let i = 0; i < spl.length; i++) {
+            				if (!spl[i].startsWith('|')) {
+            					continue;
+            				}
 
-    				let items = spl[i].split('|');
-    				if (items.length !== 4) {
-    					continue;
-    				}
-    				if (!shouldParse) {
-    					if (items[1] === '---' && items[2] === '---') {
-    						shouldParse = true;
-    					}
-    					continue;
-    				}
-    				foundModules[items[1]] = items[2];
-    			}
-    			moduleTable.modules = foundModules;
-    			moduleTable.lastUpdated = new Date();
-    		}
-    		callback(url);
-    	}
-    	else {
-    		callback(url, $$`Could not update the list of KPM entries. Module entries may not be up to date.`);
-    	}
+            				const items = spl[i].split('|');
+            				if (items.length < 4) {
+            					continue;
+            				}
+            				if (!shouldParse) {
+            					if (items[1] === '---' && items[2] === '---') {
+            						shouldParse = true;
+            					}
+            					continue;
+            				}
+            				foundModules[items[1]] = items[2];
+            			}
+            			moduleTable.modules = foundModules;
+            			moduleTable.lastUpdated = new Date();
+            		}
+            		resolve();
+            	}
+            	else {
+            		resolve($$`Could not update the list of KPM entries. Module entries may not be up to date.`);
+            	}
+            });
+        });
     };
 
     if (!config.hasOwnProperty('tableUrl')) {

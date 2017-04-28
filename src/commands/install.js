@@ -49,17 +49,9 @@ module.exports = (types, moduleTable, moduleCtrl) => {
             for (let i = 0; i < args.length; i++) {
                 let url = args[i],
                     spl = url.split('/');
-                if (spl.length === 1) {
-                    moduleTable.refreshModuleTable(url, (u, err) => {
-                        if (err || !moduleTable.getModuleTable()[u]) {
-                            return;
-                        }
-                        url = moduleTable.getModuleTable()[u];
-                    });
-                }
-                else if (!url.startsWith('ssh') && !url.startsWith('http')) {
+                if (spl.length !== 1 && !url.startsWith('ssh') && !url.startsWith('http')) {
                     if (spl.length === 2) {
-                        url = 'https://github.com/' + url.trim() + '.git';
+                        url = `https://github.com/${url.trim()}.git`;
                     }
                     else {
                         api.sendMessage($$`Invalid KPM module provided "${url}"`, event.thread_id);
@@ -85,20 +77,26 @@ module.exports = (types, moduleTable, moduleCtrl) => {
                         }
                     };
 
-                    try {
-                        types('install', url, (url, moduleLocation, cleanup, api, event) => {
-                            moduleCtrl.verify(moduleLocation)
-                                .then(installFinal.bind(this, moduleLocation, cleanup, api, event))
-                                .catch(() => {
-                                    api.sendMessage($$`"${url}" is not a valid module/script.`, event.thread_id);
-                                    return cleanup();
-                                });
-                        }, url, dir, cleanup, api, event);
-                    }
-                    catch (e) {
-                        api.sendMessage($$`Invalid KPM module provided "${url}"`, event.thread_id);
-                        console.critical(e);
-                    }
+                    moduleTable.refreshModuleTable()
+                        .then(err => {
+                            if (!err && moduleTable.getModuleTable()[url]) {
+                                url = moduleTable.getModuleTable()[url];
+                            }
+                            try {
+                                types('install', url, (url, moduleLocation, cleanup, api, event) => {
+                                    moduleCtrl.verify(moduleLocation)
+                                        .then(installFinal.bind(this, moduleLocation, cleanup, api, event))
+                                        .catch(() => {
+                                            api.sendMessage($$`"${url}" is not a valid module/script.`, event.thread_id);
+                                            return cleanup();
+                                        });
+                                }, url, dir, cleanup, api, event);
+                            }
+                            catch (e) {
+                                api.sendMessage($$`Invalid KPM module provided "${url}"`, event.thread_id);
+                                console.critical(e);
+                            }
+                        });
                 });
             }
         },
