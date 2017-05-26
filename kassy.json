@@ -1,6 +1,6 @@
 {
 	"name": "kpm",
-	"version": "4.1.0",
+	"version": "4.1.1",
 	"startup": "kpm.js",
 	"priority": "first",
 	"help": [

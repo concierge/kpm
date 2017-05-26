@@ -12,7 +12,7 @@ module.exports = moduleCtrl => {
 
             moduleCtrl.stop(mod)
                 .then(() => api.sendMessage($$`"${mod.__descriptor.name}" has been stopped.`, event.thread_id))
-                .catch(() => api.sendMessage($$`"${module.__descriptor.name}" failed to stop.`, event.thread_id))
+                .catch(() => api.sendMessage($$`"${mod.__descriptor.name}" failed to stop.`, event.thread_id))
         },
         command: 'stop <integrationName>',
         help: $$`Stops an integration`,
