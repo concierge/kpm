@@ -51,75 +51,44 @@ class ModuleController {
         return this.platform.modulesLoader.getLoadedModules(type);
     }
 
-    getConfig (args) {
-        return this.platform.config.loadConfig(args);
+    async getConfig (args) {
+        return await this.platform.config.loadConfig(args);
     }
 
-    static _wrapResult (method) {
-        return new Promise((resolve, reject) => {
-            try {
-                const result = method();
-                if (!result.success) {
-                    result.error = new Error(result.message);
-                    reject(result);
-                }
-                else {
-                    resolve(result);
-                }
-            }
-            catch (e) {
-                console.critical(e);
-                reject({
-                    success: false,
-                    error: e
-                });
-            }
-        });
+    async verify (dir) {
+        const result = await this.platform.modulesLoader.verifyModule(dir);
+        if (!result) {
+            throw new Error('Directory is not a valid module.');
+        }
+        return result;
     }
 
-    verify (dir) {
-        return new Promise((resolve) => {
-            const result = this.platform.modulesLoader.verifyModule(dir);
-            if (!result) {
-                throw new Error('Directory is not a valid module.');
-            }
-            resolve(result);
-        });
+    async load (dir) {
+        const descriptor = await this.verify(dir);
+        return await this.platform.modulesLoader.loadModule(descriptor);
     }
 
-    load (dir) {
-        return this.verify(dir)
-            .then(ModuleController._wrapResult(() => {
-                const descriptor = this.platform.modulesLoader.verifyModule(dir);
-                return this.platform.modulesLoader.loadModule(descriptor);
-            }));
+    async unload (mod) {
+        return await this.platform.modulesLoader.unloadModule(mod);
     }
 
-    unload (mod) {
-        return ModuleController._wrapResult(() => this.platform.modulesLoader.unloadModule(mod));
-    }
-
-    reload (mod) {
+    async reload (mod) {
         const shouldStart = mod.__running,
             dir = mod.__descriptor.folderPath;
-        return this.unload(mod)
-            .then(this.load.bind(this, dir))
-            .then(res => {
-                if (shouldStart) {
-                    mod = this.findLoadedModule(m => m.__descriptor === res, 'integration');
-                    return this.start(mod)
-                                .then(() => res);
-                }
-                return res;
-            });
+        await this.unload(mod);
+        const res = await this.load(dir);
+        if (shouldStart) {
+            this.start(res.module);
+        }
+        return res;
     }
 
-    start (mod) {
-        return ModuleController._wrapResult(() => this.platform.modulesLoader.startIntegration(this.platform.onMessage, mod));
+    async start (mod) {
+        return await this.platform.modulesLoader.startIntegration(mod);
     }
 
-    stop (mod) {
-        return ModuleController._wrapResult(() => this.platform.modulesLoader.stopIntegration(mod));
+    async stop (mod) {
+        return await this.platform.modulesLoader.stopIntegration(mod);
     }
 }
 
