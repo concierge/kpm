@@ -1,68 +1,73 @@
 const npm = require('concierge/npm'),
     path = require('path'),
-    fs = require('fs-extra');
+    files = require('concierge/files');
 
-const fixMain = (jsonPath, property) => {
-    const json = JSON.parse(fs.readFileSync(jsonPath).toString());
-    json[property] = 'index.js';
-    fs.writeFileSync(jsonPath, JSON.stringify(json, null, 4));
+const copy = async(src, dst) => {
+    return await files.writeFile(dst, await files.readFile(src));
 };
 
-const rebuildModule = (pack, dir) => {
+const fixMain = async(jsonPath, property) => {
+    const json = await files.readJson(jsonPath);
+    json[property] = 'index.js';
+    return await files.writeFile(jsonPath, JSON.stringify(json, null, 4));
+};
+
+const rebuildModule = async(pack, dir) => {
     const packageJsonPath = path.join(dir, 'package.json');
-    try {
-        fs.unlinkSync(packageJsonPath);
+    if (await files.fileExists(packageJsonPath) === 'file') {
+        await files.unlink(packageJsonPath);
     }
-    catch(e) {}
-    fs.copySync(path.join(dir, `node_modules/${pack}/package.json`), packageJsonPath);
-    fixMain(packageJsonPath, 'main');
+
+    await copy(path.join(dir, `node_modules/${pack}/package.json`), packageJsonPath);
+    await fixMain(packageJsonPath, 'main');
 
     try {
         const kassyJsonPath = path.join(dir, 'kassy.json');
-        try {
-            fs.unlinkSync(kassyJsonPath);
+        if (await files.fileExists(kassyJsonPath)) {
+            files.unlink(kassyJsonPath);
         }
-        catch(e) {}
-        fs.copySync(path.join(dir, `node_modules/${pack}/kassy.json`), kassyJsonPath);
-        fixMain(kassyJsonPath, 'startup');
+        await copy(path.join(dir, `node_modules/${pack}/kassy.json`), kassyJsonPath);
+        await fixMain(kassyJsonPath, 'startup');
     }
     catch(e) {}
 };
 
-exports.install = (callback, url, dir, cleanup, api, event) => {
+exports.install = async(callback, url, dir, cleanup, api, event) => {
     url = url.trim().toLowerCase();
     api.sendMessage($$`Attempting to install module from "${'npm: ' + url}"`, event.thread_id);
-    npm.install(url, dir);
-    rebuildModule(url, dir);
-    fs.writeFileSync(path.join(dir, 'index.js'), `module.exports=require('${url}');\n`);
-    fs.writeFileSync(path.join(dir, '.npm'), JSON.stringify({package:url}), 'utf8');
+    await npm.install(url, dir);
+    await Promise.all([
+        await rebuildModule(url, dir),
+        await files.writeFile(path.join(dir, 'index.js'), `module.exports=require('${url}');\n`),
+        await files.writeFile(path.join(dir, '.npm'), JSON.stringify({package:url}), 'utf8')
+    ]);
     callback(url, dir, cleanup, api, event);
 };
 
-exports.update = (callback, module, api, event) => {
-    const p = JSON.parse(fs.readFileSync(path.join(module.__descriptor.folderPath, '.npm')).toString()).package;
-    npm.update(p, module.__descriptor.folderPath);
-    rebuildModule(p, module.__descriptor.folderPath);
+exports.update = async(callback, module, api, event) => {
+    const p = await files.readJson(path.join(module.__descriptor.folderPath, '.npm')).package;
+    await npm.update(p, module.__descriptor.folderPath);
+    await rebuildModule(p, module.__descriptor.folderPath);
     callback(module, api, event);
 };
 
-const checkExists = name => {
+const checkExists = async(name) => {
     name = name.trim().toLowerCase();
     if (/\s+/g.test(name)) {
         return false;
     }
     const rname = name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const result = npm(['search', '--json', `/^${rname}$/`]);
+    const result = await npm(['search', '--json', `/^${rname}$/`]);
     const json = JSON.parse(result);
     return !!json.find(p => p.name === name);
 };
 
-exports.typeTest = (op, selector) => {
+exports.typeTest = async(op, selector) => {
     switch (op) {
         case 'install':
-            return checkExists(selector);
+            return await checkExists(selector);
         case 'update':
             const folderPath = selector.__descriptor.folderPath;
-            return fs.statSync(path.join(folderPath, '.npm')).isFile();
+            return await files.fileExists(path.join(folderPath, '.npm')) === 'file';
     }
 };

@@ -10,11 +10,11 @@ module.exports = async(operation, selector, ...args) => {
     for (let t of types) {
         let testResult = false;
         try {
-            testResult = t.typeTest(operation, selector);
+            testResult = await t.typeTest(operation, selector);
         }
         catch(e) {}
         if (testResult) {
-            return t[operation].apply(this, args);
+            return await t[operation].apply(this, args);
         }
     }
     throw new Error('No type exists to perform that operation.');

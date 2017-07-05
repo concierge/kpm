@@ -1,48 +1,41 @@
-const fs = require('fs'),
-    path = require('path'),
+const path = require('path'),
     git = require('concierge/git'),
-    npm = require('concierge/npm');
+    npm = require('concierge/npm'),
+    files = require('concierge/files');
 
-exports.install = (callback, url, dir, cleanup, api, event) => {
+exports.install = async(callback, url, dir, cleanup, api, event) => {
     api.sendMessage($$`Attempting to install module from "${url}"`, event.thread_id);
-    git.clone(url, dir, err => {
-        if (err) {
-            cleanup(err, url);
-            return;
+    try {
+        await git.clone(url, dir);
+        if (await files.fileExists(path.join(dir, 'package.json')) === 'file') {
+            await npm(['install'], dir);
         }
-
-        fs.stat(path.join(dir, 'package.json'), (err2, stat) => {
-            if (!err2 && stat.isFile()) {
-                npm(['install'], dir);
-            }
-            callback(url, dir, cleanup, api, event);
-        });
-    });
+    }
+    catch (e) {
+        return cleanup(e, url);
+    }
+    callback(url, dir, cleanup, api, event);
 };
 
-exports.update = (callback, module, api, event) => {
-    git.pullWithPath(module.__descriptor.folderPath, err => {
-        try {
-            // force hubot.json to update
-            const hbp = path.join(module.__descriptor.folderPath, 'hubot.json');
-            fs.unlinkSync(hbp);
-        } catch(e) {}
-
-        fs.stat(path.join(module.__descriptor.folderPath, 'node_modules'), (err2, stat) => {
-            if (!err2 && stat.isDirectory()) {
-                npm(['update'], module.__descriptor.folderPath);
-            }
-            callback(module, api, event, err);
-        });
-    });
+exports.update = async(callback, module, api, event) => {
+    await git.pullWithPath(module.__descriptor.folderPath);
+    const nodeModules = path.join(module.__descriptor.folderPath, 'node_modules'),
+        hubotJson = path.join(module.__descriptor.folderPath, 'hubot.json');
+    if (await files.fileExists(nodeModules) === 'directory') {
+        await npm(['update'], module.__descriptor.folderPath);
+    }
+    if (await files.fileExists(hubotJson)) {
+        await files.unlink(hubotJson);
+    }
+    callback(module, api, event, err);
 };
 
-exports.typeTest = (op, selector) => {
+exports.typeTest = async(op, selector) => {
     switch (op) {
         case 'install':
             return selector.startsWith('ssh') || selector.endsWith('.git');
         case 'update':
             const folderPath = selector.__descriptor.folderPath;
-            return fs.statSync(path.join(folderPath, '.git')).isDirectory();
+            return await files.fileExists(path.join(folderPath, '.git')) === 'directory';
     }
 };
