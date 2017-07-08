@@ -60,5 +60,17 @@
   "\"${0}\" has been loaded.": "\"${0}\" został załadowany.",
   "\"${0}\" failed to load.": "\"${0}\" nie mógł zostać załadowany.",
   "\"${0}\" failed to load - no such module.": "\"${0}\" nie mógł zostać załadowany - nie ma takiego modułu.",
-  "\"${0}\" is already loaded.": "\"${0}\" jest już załadowany."
+  "\"${0}\" is already loaded.": "\"${0}\" jest już załadowany.",
+  "Too many arguments given to start.": "Zbyt dużo argumentów do uruchomienia.",
+  "Starts an integration": "Uruchamia integrację.",
+  "Starts an integration extended": "Uruchamia integrację. To może być użyteczne, gdy chcesz uruchomić nową integrację podczas gdy Concierge jest już uruchomiony.",
+  "\"${0}\" has been started.": "\"${0}\" został uruchomiony.",
+  "\"${0}\" failed to start.": "Uruchomienie \"${0}\" nie powiodło się.",
+  "Too many arguments given to stop.": "Zbyt dużo argumentów do zatrzymania.",
+  "Stops an integration": "Zatrzymuje integrację.",
+  "Stops an integration extended": "Zatrzymuje integrację. To może być użyteczne, gdy chcesz zatrzymać integrację podczas gdy Concierge jest już uruchomiony (w celu jej zaktualizowania, podmiany, wycofania lub zmiany konfiguracji).",
+  "\"${0}\" has been stopped.": "\"${0}\" został zatrzymany.",
+  "\"${0}\" failed to stop.": "Zatrzymanie \"${0}\" nie powiodło się.",
+  "Cannot change config to a different type.": "Cannot change config to a different primitive type (must be an object).",
+  "Uninstall Self": "Usunięcie KPM przez samo KPM jest niedozwolone bez flagi '--no-preserve-kpm'. Czy na pewno chcesz to zrobić?"
 }
