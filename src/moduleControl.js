@@ -65,7 +65,7 @@ class ModuleController {
 
     async load (dir) {
         const descriptor = await this.verify(dir);
-        return await this.platform.modulesLoader.loadModule(descriptor);
+        return (await this.platform.modulesLoader.loadModule(descriptor)).descriptor;
     }
 
     async unload (mod) {
@@ -78,7 +78,7 @@ class ModuleController {
         await this.unload(mod);
         const res = await this.load(dir);
         if (shouldStart) {
-            this.start(res.module);
+            this.start(res.name);
         }
         return res;
     }

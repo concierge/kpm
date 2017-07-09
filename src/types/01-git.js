@@ -7,7 +7,7 @@ exports.install = async(callback, url, dir, cleanup, api, event) => {
     api.sendMessage($$`Attempting to install module from "${url}"`, event.thread_id);
     try {
         await git.clone(url, dir);
-        if (await files.fileExists(path.join(dir, 'package.json')) === 'file') {
+        if ((await files.fileExists(path.join(dir, 'package.json'))) === 'file') {
             await npm(['install'], dir);
         }
     }
@@ -18,16 +18,21 @@ exports.install = async(callback, url, dir, cleanup, api, event) => {
 };
 
 exports.update = async(callback, module, api, event) => {
-    await git.pullWithPath(module.__descriptor.folderPath);
-    const nodeModules = path.join(module.__descriptor.folderPath, 'node_modules'),
-        hubotJson = path.join(module.__descriptor.folderPath, 'hubot.json');
-    if (await files.fileExists(nodeModules) === 'directory') {
-        await npm(['update'], module.__descriptor.folderPath);
+    try {
+        await git.pullWithPath(module.__descriptor.folderPath);
+        const nodeModules = path.join(module.__descriptor.folderPath, 'node_modules'),
+            hubotJson = path.join(module.__descriptor.folderPath, 'hubot.json');
+        if ((await files.fileExists(nodeModules)) === 'directory') {
+            await npm(['update'], module.__descriptor.folderPath);
+        }
+        if (await files.fileExists(hubotJson)) {
+            await files.unlink(hubotJson);
+        }
     }
-    if (await files.fileExists(hubotJson)) {
-        await files.unlink(hubotJson);
+    catch (e) {
+        return callback(module, api, event, e);
     }
-    callback(module, api, event, err);
+    callback(module, api, event);
 };
 
 exports.typeTest = async(op, selector) => {
@@ -36,6 +41,6 @@ exports.typeTest = async(op, selector) => {
             return selector.startsWith('ssh') || selector.endsWith('.git');
         case 'update':
             const folderPath = selector.__descriptor.folderPath;
-            return await files.fileExists(path.join(folderPath, '.git')) === 'directory';
+            return (await files.fileExists(path.join(folderPath, '.git'))) === 'directory';
     }
 };

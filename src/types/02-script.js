@@ -2,7 +2,7 @@ const request = require('request'),
     files = require('concierge/files'),
     path = require('path'),
     urll = require('url'),
-    sanitize = require('sanitize-filename')
+    sanitize = require('sanitize-filename'),
     util = require('util'),
     requestp = util.promisify(request.get);
 
@@ -13,7 +13,7 @@ exports.install = async(callback, url, dir, cleanup, api, event) => {
             parsed = urll.parse(url),
             cleaned = sanitize(path.basename(parsed.pathname));
         await Promise.all([
-            files.writeFile(path.join(dir, cleaned), body, 'utf8'),
+            files.writeFile(path.join(dir, cleaned), response.body, 'utf8'),
             files.writeFile(path.join(dir, '.url'), JSON.stringify({url:url}), 'utf8')
         ]);
     }
@@ -34,7 +34,7 @@ exports.update = async(callback, module, api, event) => {
 
         const response = await requestp({ url: urldata.url });
         await files.unlink(scr);
-        await files.writeFile(scr, body, 'utf8');
+        await files.writeFile(scr, response.body, 'utf8');
         callback(module, api, event);
     }
     catch (e) {
@@ -49,6 +49,6 @@ exports.typeTest = async(op, url) => {
         case 'update':
             const folderPath = url.__descriptor.folderPath;
             return await files.fileExists(path.join(folderPath, '.url')) === 'file' &&
-                files.fileExists(path.join(folderPath, 'hubot.json')) === 'file';
+                await files.fileExists(path.join(folderPath, 'hubot.json')) === 'file';
     }
 };

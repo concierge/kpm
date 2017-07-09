@@ -24,7 +24,7 @@ const rebuildModule = async(pack, dir) => {
     try {
         const kassyJsonPath = path.join(dir, 'kassy.json');
         if (await files.fileExists(kassyJsonPath)) {
-            files.unlink(kassyJsonPath);
+            await files.unlink(kassyJsonPath);
         }
         await copy(path.join(dir, `node_modules/${pack}/kassy.json`), kassyJsonPath);
         await fixMain(kassyJsonPath, 'startup');
@@ -58,7 +58,7 @@ const checkExists = async(name) => {
     }
     const rname = name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     const result = await npm(['search', '--json', `/^${rname}$/`]);
-    const json = JSON.parse(result);
+    const json = JSON.parse(typeof(result) === 'string' ? result : result.stdout);
     return !!json.find(p => p.name === name);
 };
 

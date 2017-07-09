@@ -1,10 +1,11 @@
 const files = require('concierge/files'),
     path = require('path'),
     p = path.join(__dirname, 'types');
+let types;
 
 module.exports = async(operation, selector, ...args) => {
     if (!types) {
-        types = await files.filesInDirectory(p).map(f => require(path.join(p, f)));
+        types = (await files.filesInDirectory(p)).map(f => require(path.join(p, f)));
     }
 
     for (let t of types) {
