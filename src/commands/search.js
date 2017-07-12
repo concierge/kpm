@@ -13,9 +13,12 @@ module.exports = moduleList => {
                     fmods = mods.filter(v => v.toLowerCase().contains(query));
 
                 if (!install) {
-                    let l = $$`Modules found for your query:` + `\t- ${fmods.join('\n\t- ')}\n`;
+                    let l;
                     if (fmods.length === 0) {
-                        l += $$`No modules found in the KPM table.`;
+                        l = $$`No modules found in the KPM table.`;
+                    }
+                    else {
+                        l = $$`Modules found for your query:` + `\t- ${fmods.join('\n\t- ')}\n`
                     }
                     api.sendMessage(l, event.thread_id);
                 }

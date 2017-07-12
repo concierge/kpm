@@ -86,7 +86,7 @@ module.exports = (types, moduleTable, moduleCtrl) => {
                                 types('install', url, (url, moduleLocation, cleanup, api, event) => {
                                     moduleCtrl.verify(moduleLocation)
                                         .then(installFinal.bind(this, moduleLocation, cleanup, api, event))
-                                        .catch(() => {
+                                        .catch((e) => {
                                             api.sendMessage($$`"${url}" is not a valid module/script.`, event.thread_id);
                                             return cleanup();
                                         });
