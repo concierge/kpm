@@ -39,11 +39,11 @@ const getPropertyForString = (searchObject, defaultProperty, searchQuery) => {
 
 module.exports = moduleCtrl => {
     return {
-        run: (args, api, event) => {
+        run: async(args, api, event) => {
             if (args.length < 2) {
                 return api.sendMessage($$`Incorrect arguments for configure.`, event.thread_id);
             }
-            const cfg = moduleCtrl.getConfig({
+            const cfg = await moduleCtrl.getConfig({
                     name: args[0],
                     type: [],
                     force: true
